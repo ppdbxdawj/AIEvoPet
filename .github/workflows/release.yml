@@ -29,7 +29,7 @@ jobs:
     name: Pre-flight (typecheck + tests)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -73,7 +73,7 @@ jobs:
             args: ''
     runs-on: ${{ matrix.platform.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
