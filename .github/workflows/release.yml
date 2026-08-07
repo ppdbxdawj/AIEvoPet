@@ -114,7 +114,7 @@ jobs:
       # produced installers (.dmg / .app.tar.gz / .msi / .AppImage / .deb) to a
       # draft GitHub Release, and creates the release if it doesn't exist.
       - name: Build app + upload to draft release
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Disable Tauri updater signing for now (no public update server yet).
