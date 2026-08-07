@@ -1,0 +1,27 @@
+#!/bin/sh
+# aievopet-codex — run Codex CLI with AIEvoPet task visibility.
+
+set -u
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
+WATCHER="$SCRIPT_DIR/../bin/aievopet-watch"
+if [ ! -x "$WATCHER" ]; then
+  if command -v aievopet-watch >/dev/null 2>&1; then
+    WATCHER="$(command -v aievopet-watch)"
+  else
+    printf 'aievopet-codex: aievopet-watch not found. Add adapters/bin to PATH or keep this script inside adapters/codex/.\n' >&2
+    exit 127
+  fi
+fi
+
+CODEX_BIN="${AIEVOPET_CODEX_BIN:-codex}"
+if ! command -v "$CODEX_BIN" >/dev/null 2>&1; then
+  printf 'aievopet-codex: Codex binary not found: %s\n' "$CODEX_BIN" >&2
+  printf 'Set AIEVOPET_CODEX_BIN=/path/to/codex if Codex is installed elsewhere.\n' >&2
+  exit 127
+fi
+
+AIEVOPET_SOURCE="${AIEVOPET_SOURCE:-codex}" \
+AIEVOPET_KIND_BASE="${AIEVOPET_KIND_BASE:-task}" \
+AIEVOPET_TITLE="${AIEVOPET_TITLE:-Codex CLI task}" \
+exec "$WATCHER" "$CODEX_BIN" "$@"

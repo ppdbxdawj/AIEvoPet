@@ -1,0 +1,45 @@
+[package]
+name = "aievopet-shell"
+version = "0.1.0"
+description = "Tauri shell for AIEvoPet — an open-source AI desktop pet"
+authors = ["AIEvoPet Contributors"]
+license = "MIT"
+repository = "https://github.com/aievopet/aievopet"
+homepage = "https://github.com/aievopet/aievopet"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = ["macos-private-api"] }
+tauri-plugin-webdriver = { version = "0.2", optional = true }
+# Cross-platform system idle counter; powers the diary's "active minutes"
+# stat. Reads OS-level "seconds since last input" via:
+#   macOS  -> CGEventSourceSecondsSinceLastEventType
+#   Windows -> GetLastInputInfo
+#   Linux x11 -> XScreenSaverQueryInfo (wayland: not supported by upstream)
+# We only sample once per minute on a background thread so the cost is
+# negligible. Disabled-by-default in PetDiaryConfig so users opt in.
+user-idle = "0.6"
+# Base64 encoding for streaming user-supplied wardrobe PNGs back to the
+# renderer as data URLs. We use this only at startup (~50 small files,
+# total < 5MB), so the CPU cost is negligible and we avoid setting up
+# tauri's asset:// custom protocol just for this one feature.
+base64 = "0.22"
+
+# macOS-only: we reach into AppKit to set
+# NSWindowCollectionBehaviorFullScreenAuxiliary on the pet window so it can
+# float above other apps' fullscreen Spaces (Tauri's API doesn't expose this
+# bit). Uses objc2-app-kit bindings (objc/cocoa crates are deprecated).
+[target."cfg(target_os = \"macos\")".dependencies]
+objc2 = "0.6.4"
+objc2-app-kit = "0.3.2"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+webdriver = ["tauri-plugin-webdriver"]

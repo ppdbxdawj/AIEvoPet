@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "AIEvoPet",
+  "version": "0.1.0",
+  "identifier": "com.aievopet.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:5173",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../out/renderer"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    },
+    "macOSPrivateApi": true,
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "publisher": "AIEvoPet",
+    "copyright": "Copyright (c) 2026 AIEvoPet Contributors",
+    "category": "Entertainment",
+    "shortDescription": "AI desktop pet that lives, learns, and grows with you",
+    "longDescription": "AIEvoPet is an open-source AI desktop pet that lives in the corner of your screen, learns who you are, and grows up alongside you. It runs local LLMs, keeps everything on your machine, and never phones home."
+  }
+}

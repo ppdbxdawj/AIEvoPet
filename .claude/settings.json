@@ -1,0 +1,62 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/bytedance/Desktop/tt/AIPet/scripts/emit-coding-event.mjs '{\"kind\":\"task-start\",\"source\":\"claude-code\",\"status\":\"running\",\"title\":\"Claude Code started\"}' >> /tmp/aievopet-claude-code-hook.log 2>&1 || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/bytedance/Desktop/tt/AIPet/scripts/emit-coding-stop-event.mjs --source claude-code >> /tmp/aievopet-claude-code-hook.log 2>&1 || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "idle_prompt|permission_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/bytedance/Desktop/tt/AIPet/scripts/emit-claude-attention-event.mjs >> /tmp/aievopet-claude-code-hook.log 2>&1 || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/bytedance/Desktop/tt/AIPet/scripts/emit-claude-attention-event.mjs >> /tmp/aievopet-claude-code-hook.log 2>&1 || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Elicitation": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/bytedance/Desktop/tt/AIPet/scripts/emit-claude-attention-event.mjs >> /tmp/aievopet-claude-code-hook.log 2>&1 || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

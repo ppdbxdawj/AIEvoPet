@@ -1,0 +1,106 @@
+#!/bin/sh
+# aievopet-watch — wrap any shell command, emit start + done/failed events.
+#
+# This is the universal "give my pet visibility into this command" tool.
+# Use it for: test runs, builds, deploys, long-running scripts, CI tasks,
+# CLI agents that don't have a dedicated AIEvoPet hook (Aider, Codex CLI,
+# Gemini CLI, opencode, etc).
+#
+# Usage:
+#   aievopet-watch <command> [args...]
+#
+# Optional environment overrides:
+#   AIEVOPET_TITLE       Display title (default: the command itself)
+#   AIEVOPET_SOURCE      Event source label (default: manual)
+#                        Valid: claude-code | codex | cursor | vscode | skill | manual
+#   AIEVOPET_KIND_BASE   Override the event-kind family. Choices:
+#                          task   (default)  → task-start / task-done / task-failed
+#                          test               → task-start / test-pass / test-fail
+#                          build              → task-start / build-pass / build-fail
+#
+# Examples:
+#   aievopet-watch npm test
+#   aievopet-watch cargo build --release
+#   AIEVOPET_KIND_BASE=test aievopet-watch pytest -q
+#   AIEVOPET_TITLE="Deploy staging" AIEVOPET_SOURCE=manual aievopet-watch ./deploy.sh
+#
+# The wrapped command's stdout/stderr/exit code passes through unchanged.
+
+set -u
+
+if [ $# -lt 1 ]; then
+  printf 'aievopet-watch: usage: aievopet-watch <command> [args...]\n' >&2
+  exit 2
+fi
+
+# Resolve aievopet-emit. Prefer the one next to this script; fall back to PATH.
+SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
+EMITTER="$SCRIPT_DIR/aievopet-emit"
+if [ ! -x "$EMITTER" ]; then
+  if command -v aievopet-emit >/dev/null 2>&1; then
+    EMITTER="$(command -v aievopet-emit)"
+  else
+    [ -n "${AIEVOPET_DEBUG:-}" ] && printf 'aievopet-watch: aievopet-emit not found, running command unwrapped\n' >&2
+    exec "$@"
+  fi
+fi
+
+TITLE="${AIEVOPET_TITLE:-$*}"
+SOURCE="${AIEVOPET_SOURCE:-manual}"
+KIND_BASE="${AIEVOPET_KIND_BASE:-task}"
+case "$KIND_BASE" in
+  task)  KIND_DONE="task-done";  KIND_FAIL="task-failed" ;;
+  test)  KIND_DONE="test-pass";  KIND_FAIL="test-fail"  ;;
+  build) KIND_DONE="build-pass"; KIND_FAIL="build-fail" ;;
+  *)
+    printf 'aievopet-watch: unknown AIEVOPET_KIND_BASE=%s, defaulting to task\n' "$KIND_BASE" >&2
+    KIND_DONE="task-done"; KIND_FAIL="task-failed"
+    ;;
+esac
+
+# Stable id ties the start and done/failed events together so the pet daemon
+# can dedupe / pair them.
+EVENT_ID="watch-$(date +%s)-$$"
+
+START_TS=$(date +%s)
+"$EMITTER" task-start \
+  --status running \
+  --title "$TITLE" \
+  --source "$SOURCE" \
+  --id "${EVENT_ID}-start" \
+  --meta "command=$*" \
+  --meta "watcher=aievopet-watch" \
+  >/dev/null 2>&1 || true
+
+# Run the wrapped command. We keep its stdio passthrough intact and capture
+# only the exit code.
+"$@"
+EXIT_CODE=$?
+END_TS=$(date +%s)
+DURATION=$((END_TS - START_TS))
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+  "$EMITTER" "$KIND_DONE" \
+    --status succeeded \
+    --title "$TITLE" \
+    --source "$SOURCE" \
+    --id "${EVENT_ID}-done" \
+    --summary "Completed in ${DURATION}s" \
+    --meta "command=$*" \
+    --meta "exit_code=0" \
+    --meta "duration_s=$DURATION" \
+    >/dev/null 2>&1 || true
+else
+  "$EMITTER" "$KIND_FAIL" \
+    --status failed \
+    --title "$TITLE" \
+    --source "$SOURCE" \
+    --id "${EVENT_ID}-fail" \
+    --summary "Exit code $EXIT_CODE after ${DURATION}s" \
+    --meta "command=$*" \
+    --meta "exit_code=$EXIT_CODE" \
+    --meta "duration_s=$DURATION" \
+    >/dev/null 2>&1 || true
+fi
+
+exit $EXIT_CODE

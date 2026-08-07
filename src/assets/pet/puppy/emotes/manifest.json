@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "spritesheet": "spritesheet.webp",
+  "cellWidth": 192,
+  "cellHeight": 208,
+  "columns": 2,
+  "rows": {
+    "celebrating": {
+      "row": 0,
+      "frames": 2,
+      "frameMs": 90
+    },
+    "failed": {
+      "row": 1,
+      "frames": 2,
+      "frameMs": 90
+    }
+  }
+}

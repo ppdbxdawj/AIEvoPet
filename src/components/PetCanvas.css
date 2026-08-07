@@ -1,0 +1,1182 @@
+@media (prefers-reduced-motion: reduce) {
+  .pet-shell,
+  .pet-shell *,
+  .pet-shell *::before,
+  .pet-shell *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .pet-shell,
+  .pet-aura,
+  .pet-alert-ring,
+  .pet-sparkle,
+  .pet-head-cue,
+  .pet-body,
+  .part-eyes,
+  .part-snout {
+    transform: none !important;
+  }
+}
+
+.pet-shell {
+  position: relative;
+  width: 272px;
+  display: flex;
+  justify-content: center;
+}
+
+.pet-shell.sleeping,
+.pet-shell.tempo-slow {
+  animation-duration: 5.8s;
+}
+
+.pet-shell.tempo-steady {
+  animation-duration: 3.4s;
+}
+
+.pet-shell.tempo-quick {
+  animation-duration: 2.05s;
+}
+
+.pet-shell.weight-light {
+  transform-origin: center bottom;
+}
+
+.pet-shell.weight-grounded {
+  animation-name: floatyGrounded;
+}
+
+.pet-shell.weight-springy {
+  animation-name: floatySpring;
+}
+
+.pet-shell.motion-focus,
+.pet-shell.motion-idle,
+.pet-shell.motion-thinking,
+.pet-shell.motion-reviewing,
+.pet-shell.motion-waiting {
+  animation-name: floatyFocus;
+}
+
+.pet-shell.motion-focus .pet-aura,
+.pet-shell.motion-idle .pet-aura,
+.pet-shell.motion-thinking .pet-aura,
+.pet-shell.motion-reviewing .pet-aura,
+.pet-shell.motion-waiting .pet-aura {
+  animation: auraPulseFocus 5.6s ease-in-out infinite;
+  opacity: 0.18;
+}
+
+.pet-hover-capture {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  pointer-events: auto;
+  z-index: 0;
+}
+
+.pet-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 272px;
+  height: 272px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Wardrobe overlay layer. Absolute children are placed at the centre of
+   pet-body via top/left 50% + translate(-50%,-50%) so the (x, y) values
+   stored in pet.ui.wardrobePlacements map 1:1 to the pet sprite centre.
+   pointer-events: none keeps clicks falling through to .pet-body. */
+.pet-wardrobe-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pet-wardrobe-overlay-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 96px;
+  height: 96px;
+  transform-origin: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+
+.pet-wardrobe-overlay-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.pet-wardrobe-overlay-placeholder {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--pet-accent, #ff7ab1) 26%, rgba(255, 255, 255, 0.85));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pet-accent, #ff7ab1) 60%, transparent);
+  color: color-mix(in srgb, var(--pet-text, #2b2230) 86%, transparent);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px;
+  line-height: 1.2;
+}
+
+/* Aura colors come from the active palette's CSS variables on the .pet-app root. */
+
+.pet-sprite-stack {
+  position: relative;
+  width: 248px;
+  height: 248px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.pet-cutout-canvas {
+  position: absolute;
+  inset: 0;
+  width: 248px;
+  height: 248px;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 22px rgba(122, 84, 105, 0.16));
+}
+
+.pet-cutout-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 248px;
+  height: 248px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  object-fit: contain;
+  object-position: top left;
+  transform-origin: center center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.pet-cutout-piece {
+  opacity: 0;
+}
+
+.pet-cutout-piece img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: top left;
+  pointer-events: none;
+}
+
+.part-eyes,
+.part-snout,
+.part-body {
+  opacity: 1;
+}
+
+.pet-cutout-canvas.debug-visible .pet-cutout-piece {
+  opacity: 1;
+}
+
+.pet-cutout-canvas.debug-visible .part-reference {
+  opacity: 0.28;
+}
+
+.pet-cutout-canvas.debug-visible .pet-cutout-layer {
+  outline: 1px dashed rgba(255, 123, 173, 0.45);
+}
+
+.part-reference {
+  z-index: 1;
+}
+
+.part-ears {
+  z-index: 2;
+}
+
+.part-head {
+  z-index: 3;
+}
+
+.part-eyes {
+  z-index: 4;
+  transform-origin: center 52%;
+}
+
+.part-blush {
+  z-index: 5;
+}
+
+.part-snout {
+  z-index: 6;
+  transform-origin: center 48%;
+}
+
+.part-body {
+  z-index: 7;
+}
+
+.part-body img {
+  transform-origin: center 76%;
+}
+
+.part-limbs {
+  z-index: 8;
+}
+
+.pet-aura {
+  position: absolute;
+  inset: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--pet-aura-color), transparent);
+  opacity: 0.55;
+  filter: blur(8px);
+  animation: auraPulse 3.2s ease-in-out infinite;
+}
+
+.pet-alert-ring {
+  position: absolute;
+  inset: 22px;
+  border: 2px solid rgba(255, 124, 170, 0.55);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.86);
+}
+
+.pet-sparkle {
+  position: absolute;
+  top: 34px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 214, 228, 0.95);
+  opacity: 0;
+}
+
+.pet-sparkle-left {
+  left: 12px;
+}
+
+.pet-sparkle-right {
+  right: 14px;
+  animation-delay: 0.12s;
+}
+
+.pet-head-cue {
+  position: absolute;
+  top: 20px;
+  right: 18px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(143, 154, 189, 0.82);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 6px 14px rgba(122, 84, 105, 0.1);
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transform: translateY(2px) scale(0.9);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: none;
+}
+
+.pet-head-cue.cue-sleepy {
+  color: rgba(152, 120, 173, 0.92);
+}
+
+.pet-head-cue.cue-hungry {
+  color: rgba(198, 106, 87, 0.95);
+}
+
+.pet-head-cue.cue-work {
+  color: rgba(103, 125, 198, 0.95);
+}
+
+/* Active part-time job: make the work cue unmistakable with a tiny pulse
+   and subtle ring so "出发" has clear persistent visual feedback. */
+.pet-shell:hover .pet-head-cue,
+.pet-shell:focus-within .pet-head-cue {
+  opacity: 0.88;
+  transform: translateY(0) scale(1);
+}
+
+.pet-shell.headcue-work-active:hover .pet-head-cue.cue-work,
+.pet-shell.headcue-work-active:focus-within .pet-head-cue.cue-work {
+  animation: cueWorkPulse 1.35s ease-in-out infinite;
+}
+
+.pet-shell.headcue-work-active .pet-alert-ring {
+  opacity: 0.42;
+  border-color: rgba(123, 150, 240, 0.62);
+  animation: workRingPulse 1.75s ease-out infinite;
+}
+
+.pet-shell.headcue-work-active .pet-sparkle {
+  opacity: 0.55;
+  background: rgba(193, 212, 255, 0.95);
+  animation: sparkle 1.25s ease-out infinite;
+}
+
+.pet-head-cue.cue-earn {
+  color: rgba(191, 131, 58, 0.95);
+}
+
+.pet-head-cue.cue-spend {
+  color: rgba(178, 102, 167, 0.95);
+}
+
+/* Drag-to-feed hint: soft bob so "?" reads as curiosity, not an error. */
+.pet-shell.headcue-hint .pet-head-cue.cue-hint {
+  color: rgba(96, 118, 178, 0.96);
+  animation: cueHintBob 1s ease-in-out infinite;
+}
+
+@keyframes cueHintBob {
+  0%,
+  100% {
+    transform: translateY(0) scale(0.96);
+  }
+  50% {
+    transform: translateY(-2px) scale(1);
+  }
+}
+
+
+.pet-shell.blink-soft .part-eyes,
+.pet-shell.blink-alert .part-eyes,
+.pet-shell.blink-sleepy .part-eyes {
+  animation: eyeBlink 4.8s ease-in-out infinite;
+}
+
+.pet-shell.blink-sleepy .part-eyes {
+  animation: eyeBlinkSleepy 2.6s ease-in-out infinite;
+}
+
+.pet-shell.motion-talk.snout-active .part-snout {
+  animation: snoutTalkActive 0.9s ease-in-out infinite;
+}
+
+.pet-shell.motion-bounce.snout-soft .part-snout {
+  animation: snoutBounceSoft 1.2s ease-in-out infinite;
+}
+
+.pet-shell.motion-excited.snout-soft .part-snout,
+.pet-shell.motion-excited.snout-active .part-snout {
+  animation: snoutExcitedActive 0.76s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.pet-shell.motion-hungry.snout-active .part-snout {
+  animation: snoutHungryActive 1.1s ease-in-out infinite;
+}
+
+.pet-shell.motion-alert.snout-soft .part-snout,
+.pet-shell.motion-alert.snout-active .part-snout,
+.pet-shell.motion-failed.snout-soft .part-snout,
+.pet-shell.motion-failed.snout-active .part-snout {
+  animation: snoutAlertActive 1s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.pet-shell.motion-sleepy.snout-still .part-snout,
+.pet-shell.sleeping .part-snout {
+  animation: snoutSleepSoft 2.8s ease-in-out infinite;
+}
+
+.pet-shell.motion-bounce.cheeks-active .part-blush,
+.pet-shell.motion-excited.cheeks-soft .part-blush,
+.pet-shell.motion-excited.cheeks-active .part-blush {
+  animation: cheekWarmPulse 1.25s ease-in-out infinite;
+}
+
+.pet-shell.motion-focus .pet-aura,
+.pet-shell.highlight-soft .pet-aura {
+  opacity: 0.28;
+}
+
+.pet-shell.motion-excited .pet-aura,
+.pet-shell.motion-alert .pet-aura,
+.pet-shell.motion-failed .pet-aura {
+  opacity: 0.72;
+}
+
+.pet-shell.motion-excited .pet-sparkle,
+.pet-shell.motion-alert .pet-sparkle,
+.pet-shell.motion-thinking .pet-sparkle,
+.pet-shell.motion-reviewing .pet-sparkle,
+.pet-shell.motion-waiting .pet-sparkle,
+.pet-shell.sparkle-soft .pet-sparkle,
+.pet-shell.sparkle-active .pet-sparkle {
+  animation: sparkle 1.55s ease-out infinite;
+}
+
+.pet-shell.motion-sleepy:hover .pet-head-cue.cue-sleepy,
+.pet-shell.motion-sleepy:focus-within .pet-head-cue.cue-sleepy,
+.pet-shell.sleeping:hover .pet-head-cue.cue-sleepy,
+.pet-shell.sleeping:focus-within .pet-head-cue.cue-sleepy {
+  animation: sleepyMarks 2.2s ease-in-out infinite;
+}
+
+
+.pet-shell.eyes-soft .pet-sprite-stack {
+  transform: translateY(1px) scaleY(0.985);
+}
+
+.pet-shell.eyes-smile .pet-sprite-stack {
+  filter: brightness(1.02) saturate(1.04);
+}
+
+.pet-shell.eyes-sleepy .pet-sprite-stack {
+  transform: translateY(2px) scaleY(0.97);
+  opacity: 0.985;
+}
+
+.pet-shell.eyes-sparkle .pet-sprite-stack {
+  filter: brightness(1.05) saturate(1.1) drop-shadow(0 0 8px rgba(255, 214, 240, 0.45));
+}
+
+.pet-shell.eyes-alert .pet-sprite-stack {
+  transform: translateY(-1px) scale(1.01);
+  filter: contrast(1.06) saturate(1.08);
+}
+
+.pet-shell.mouth-smile .pet-body {
+  transform: translateY(-1px);
+}
+
+.pet-shell.mouth-pout .pet-body {
+  transform: translateY(1px) scaleX(0.995);
+}
+
+.pet-shell.show-anim-nudge .pet-body {
+  animation: petShowNudge 560ms ease-out 1;
+}
+
+.pet-shell.show-anim-bounce .pet-sprite-stack {
+  animation: petShowBounce 760ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+
+.pet-shell.show-anim-blush .pet-aura {
+  animation: petShowBlush 1200ms ease-out 1;
+}
+
+.pet-shell.show-anim-sleep:hover .pet-head-cue.cue-sleepy,
+.pet-shell.show-anim-sleep:focus-within .pet-head-cue.cue-sleepy {
+  opacity: 0.9;
+  animation: petShowSleep 2200ms ease-in-out infinite;
+}
+
+.pet-shell.show-anim-alert .pet-alert-ring {
+  opacity: 1;
+  animation: petShowAlert 900ms ease-out 2;
+}
+
+
+.pet-shell .pet-body {
+  transform-origin: center 72%;
+}
+
+.pet-shell.lean-soft.lean-left .pet-body,
+.pet-shell.lean-active.lean-left .pet-body {
+  transform: rotate(-6deg) translateX(-5px);
+}
+
+.pet-shell.lean-soft.lean-right .pet-body,
+.pet-shell.lean-active.lean-right .pet-body {
+  transform: rotate(6deg) translateX(5px);
+}
+
+.pet-shell.head-bob-soft .part-head img,
+.pet-shell.head-bob-soft .part-eyes img,
+.pet-shell.head-bob-soft .part-snout img,
+.pet-shell.head-bob-soft .part-blush img {
+  animation: layerHeadBobSoft 3.6s ease-in-out infinite;
+}
+
+.pet-shell.head-bob-active .part-head img,
+.pet-shell.head-bob-active .part-eyes img,
+.pet-shell.head-bob-active .part-snout img,
+.pet-shell.head-bob-active .part-blush img {
+  animation: layerHeadBobActive 1.85s ease-in-out infinite;
+}
+
+.pet-shell.head-tilt-soft .part-head img,
+.pet-shell.head-tilt-soft .part-eyes img,
+.pet-shell.head-tilt-soft .part-snout img,
+.pet-shell.head-tilt-soft .part-blush img {
+  animation: layerHeadTiltSoft 3.9s ease-in-out infinite;
+}
+
+.pet-shell.head-tilt-active .part-head img,
+.pet-shell.head-tilt-active .part-eyes img,
+.pet-shell.head-tilt-active .part-snout img,
+.pet-shell.head-tilt-active .part-blush img {
+  animation: layerHeadTiltActive 1.45s ease-in-out infinite;
+}
+
+.pet-shell.body-squash-soft .part-body img {
+  animation: layerBodyBreathSoft 3.8s ease-in-out infinite;
+}
+
+.pet-shell.body-squash-active .part-body img {
+  animation: layerBodyBounceActive 1.8s ease-in-out infinite;
+}
+
+.pet-shell.limbs-soft .part-limbs img {
+  animation: layerLimbBounceSoft 2.4s ease-in-out infinite;
+}
+
+.pet-shell.limbs-active .part-limbs img {
+  animation: layerLimbBounceActive 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+.pet-shell.ears-soft .part-ears img {
+  animation: layerEarSwaySoft 3.2s ease-in-out infinite;
+}
+
+.pet-shell.ears-active .part-ears img {
+  animation: layerEarSwayActive 1.45s ease-in-out infinite;
+}
+
+.pet-shell.eyes-focus-soft .part-eyes img {
+  animation: layerEyeAttendSoft 2.8s ease-in-out infinite;
+}
+
+.pet-shell.eyes-focus-active .part-eyes img {
+  animation: layerEyeAttendActive 1.15s ease-in-out infinite;
+}
+
+.pet-shell.motion-talk .part-head img,
+.pet-shell.motion-talk .part-eyes img,
+.pet-shell.motion-talk .part-snout img,
+.pet-shell.motion-talk .part-blush img,
+.pet-shell.motion-reviewing .part-head img,
+.pet-shell.motion-reviewing .part-eyes img,
+.pet-shell.motion-reviewing .part-snout img,
+.pet-shell.motion-reviewing .part-blush img {
+  animation-duration: 1s;
+}
+
+.pet-shell.motion-excited .part-body img,
+.pet-shell.motion-bounce .part-body img {
+  animation-duration: 1.5s;
+}
+
+.pet-shell.motion-sleepy .part-head img,
+.pet-shell.sleeping .part-head img,
+.pet-shell.motion-sleepy .part-eyes img,
+.pet-shell.sleeping .part-eyes img,
+.pet-shell.motion-sleepy .part-snout img,
+.pet-shell.sleeping .part-snout img,
+.pet-shell.motion-sleepy .part-blush img,
+.pet-shell.sleeping .part-blush img,
+.pet-shell.motion-thinking .part-head img,
+.pet-shell.motion-thinking .part-eyes img,
+.pet-shell.motion-thinking .part-snout img,
+.pet-shell.motion-thinking .part-blush img,
+.pet-shell.motion-waiting .part-head img,
+.pet-shell.motion-waiting .part-eyes img,
+.pet-shell.motion-waiting .part-snout img,
+.pet-shell.motion-waiting .part-blush img {
+  animation-duration: 4.6s;
+}
+
+@keyframes layerHeadBobSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes layerHeadBobActive {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes layerHeadTiltSoft {
+  0%,
+  100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes layerHeadTiltActive {
+  0%,
+  100% {
+    transform: rotate(-3.5deg) translateY(-1px);
+  }
+  50% {
+    transform: rotate(3deg) translateY(-4px);
+  }
+}
+
+@keyframes layerBodyBreathSoft {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(1px) scale(1.015, 0.985);
+  }
+}
+
+@keyframes layerBodyBounceActive {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  40% {
+    transform: translateY(-6px) scale(0.985, 1.03);
+  }
+  65% {
+    transform: translateY(1px) scale(1.02, 0.98);
+  }
+}
+
+@keyframes layerLimbBounceSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px) rotate(-1deg);
+  }
+}
+
+@keyframes layerLimbBounceActive {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  40% {
+    transform: translateY(-7px) rotate(-2deg);
+  }
+  70% {
+    transform: translateY(1px) rotate(1deg);
+  }
+}
+
+@keyframes layerEarSwaySoft {
+  0%,
+  100% {
+    transform: rotate(-2deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2deg) translateY(-2px);
+  }
+}
+
+@keyframes layerEarSwayActive {
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(6deg) translateY(-4px);
+  }
+}
+
+@keyframes layerEyeAttendSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes layerEyeAttendActive {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.02);
+  }
+}
+
+@keyframes eyeBlink {
+  0%,
+  86%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  90% {
+    transform: scaleY(0.08);
+    opacity: 0.92;
+  }
+  93% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes snoutPulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(1px) scale(1.02, 0.96);
+  }
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes floatyAlert {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-5px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes chatter {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-2px) scale(1.02, 0.98);
+  }
+  60% {
+    transform: translateY(1px) scale(0.99, 1.01);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.04);
+  }
+}
+
+@keyframes hungryShimmy {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  25% {
+    transform: translateX(-2px) translateY(1px) scale(0.995, 1.01);
+  }
+  75% {
+    transform: translateX(2px) translateY(1px) scale(1.005, 0.995);
+  }
+}
+
+@keyframes drowsy {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.4deg) scale(0.99);
+  }
+  50% {
+    transform: translateY(3px) rotate(1.1deg) scale(1.01, 0.985);
+  }
+}
+
+@keyframes alertBounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-10px) scale(1.03);
+  }
+  50% {
+    transform: translateY(1px) scale(0.99, 1.01);
+  }
+  75% {
+    transform: translateY(-6px) scale(1.01);
+  }
+}
+
+@keyframes auraPulse {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.46;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.72;
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.4);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1.08);
+  }
+}
+
+@keyframes alertRing {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.82);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes sleepyMarks {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.92);
+  }
+  40% {
+    opacity: 0.9;
+    transform: translateY(-4px) scale(1);
+  }
+}
+
+@keyframes cueFloat {
+  0%, 100% { transform: translateY(0) scale(0.96); }
+  50% { transform: translateY(-2px) scale(1); }
+}
+
+@keyframes cueWorkPulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(0.96);
+    opacity: 0.92;
+  }
+  45% {
+    transform: translateY(-2px) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes workRingPulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.82);
+  }
+  70% {
+    opacity: 0.14;
+    transform: scale(1.16);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes earTalkSoft {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: rotate(1.8deg) translateY(-1px);
+  }
+}
+
+@keyframes earBounceActive {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(3deg) translateY(-1.5px);
+  }
+}
+
+@keyframes earHungrySoft {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-2deg) translateY(0.5px);
+  }
+}
+
+@keyframes earSleepSoft {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-1.8deg) translateY(1px);
+  }
+}
+
+@keyframes earAlertActive {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(3.2deg) translateY(-1.5px);
+  }
+}
+
+@keyframes snoutTalkActive {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(0.5px) scale(1.03, 0.97);
+  }
+  70% {
+    transform: translateY(-0.5px) scale(0.99, 1.01);
+  }
+}
+
+@keyframes snoutBounceSoft {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-0.5px) scale(1.04);
+  }
+}
+
+@keyframes snoutHungryActive {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    transform: translateY(0.5px) scale(0.98, 1.02);
+  }
+}
+
+@keyframes snoutSleepSoft {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(1px) scale(1.01, 0.99);
+  }
+}
+
+@keyframes snoutAlertActive {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-0.5px) scale(1.05, 0.95);
+  }
+}
+
+@keyframes cheeksTalkSoft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03) translateY(-0.5px);
+  }
+}
+
+@keyframes cheeksBounceActive {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05) translateY(-1px);
+  }
+}
+
+@keyframes cheeksHungrySoft {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateY(0.5px) scale(0.98);
+  }
+}
+
+@keyframes cheeksSleepSoft {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0.5px) scale(0.99);
+    opacity: 0.96;
+  }
+}
+
+@keyframes cheeksAlertActive {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1.07) translateY(-1px);
+    opacity: 0.96;
+  }
+}
+
+.pet-mesh-canvas {
+  position: absolute;
+  inset: 0;
+  width: 208px;
+  height: 208px;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 22px rgba(122, 84, 105, 0.16));
+}
+
+.pet-mesh-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes topHighlightBounceActive {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-3px) scale(1.03);
+    opacity: 0.3;
+  }
+}
+
+@keyframes topHighlightHungrySoft {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.14;
+  }
+  50% {
+    transform: translateY(1px) scale(0.99);
+    opacity: 0.12;
+  }
+}
+
+@keyframes topHighlightSleepSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translateY(1px);
+    opacity: 0.08;
+  }
+}
+
+@keyframes topHighlightAlertActive {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.2;
+  }
+  45% {
+    transform: translateY(-4px) scale(1.04);
+    opacity: 0.34;
+  }
+}
+
+@keyframes eyeBlinkSoft {
+  0%,
+  88%,
+  100% {
+    transform: scaleY(1) translateY(0);
+    opacity: 1;
+  }
+  92% {
+    transform: scaleY(0.22) translateY(1px);
+    opacity: 0.92;
+  }
+}
+
+@keyframes eyeBlinkSleepy {
+  0%,
+  100% {
+    transform: scaleY(0.18);
+    opacity: 0.86;
+  }
+  50% {
+    transform: scaleY(0.08);
+    opacity: 0.76;
+  }
+}
+
+@keyframes eyeBlinkAlert {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.14) translateY(-1px);
+    opacity: 1;
+  }
+}

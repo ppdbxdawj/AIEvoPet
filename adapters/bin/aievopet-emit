@@ -1,0 +1,184 @@
+#!/bin/sh
+# aievopet-emit — single-shot emitter for the AIEvoPet coding-event bridge.
+#
+# Posts a coding event to the local AIEvoPet daemon. Designed to be called
+# from IDE hooks, shell wrappers, CI scripts, or git hooks. Has zero
+# dependencies beyond `curl` and a POSIX shell, so it can be copy-pasted
+# into any project that wants AIEvoPet integration.
+#
+# CRITICAL: this script is hard-coded to NEVER fail the caller. If the
+# AIEvoPet daemon is not running, or the network call times out, or the
+# JSON is malformed, we exit 0 and write a one-line warning to stderr.
+# Hooks must not break the user's coding workflow.
+#
+# Usage:
+#   aievopet-emit <kind> --status <status> --title <title> [options]
+#
+# Required:
+#   <kind>            One of:
+#                       task-start | task-done | task-failed
+#                       commit-created
+#                       test-pass | test-fail
+#                       build-pass | build-fail
+#   --status <s>      One of: running | succeeded | failed
+#   --title <t>       Short human-readable title (e.g. "Cursor finished a turn")
+#
+# Optional:
+#   --source <s>      claude-code | codex | cursor | vscode | skill | manual
+#                     (default: manual)
+#   --summary <s>     Longer description shown in the audit log
+#   --id <id>         Stable event ID (default: auto-generated)
+#   --meta key=value  Repeatable. Adds primitive metadata fields.
+#
+# Environment:
+#   AIEVOPET_BRIDGE_URL       HTTP endpoint (default: http://127.0.0.1:44557/coding-event)
+#   AIEVOPET_BRIDGE_TIMEOUT   curl timeout in seconds (default: 2)
+#   AIEVOPET_DEBUG            if non-empty, prints curl errors to stderr
+#
+# Examples:
+#   aievopet-emit task-done --status succeeded --title "All tests passed"
+#   aievopet-emit build-fail --status failed --title "cargo build failed" \
+#       --summary "missing trait impl" --source manual --meta branch=main
+
+set -u
+
+URL="${AIEVOPET_BRIDGE_URL:-http://127.0.0.1:44557/coding-event}"
+TIMEOUT="${AIEVOPET_BRIDGE_TIMEOUT:-2}"
+
+if ! command -v curl >/dev/null 2>&1; then
+  [ -n "${AIEVOPET_DEBUG:-}" ] && printf 'aievopet-emit: curl not found, skipping\n' >&2
+  exit 0
+fi
+
+if [ $# -lt 1 ]; then
+  printf 'aievopet-emit: missing <kind>. Try `aievopet-emit --help`.\n' >&2
+  exit 0
+fi
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'
+  exit 0
+fi
+
+KIND="$1"
+shift
+
+STATUS=""
+TITLE=""
+SOURCE="manual"
+SUMMARY=""
+EVENT_ID=""
+
+# Build metadata as a JSON fragment as we parse args. Each --meta appends
+# `,"key":<value>` (with proper string/number/bool detection so 0/1/true/false
+# stay as primitives in the JSON).
+METADATA_JSON=""
+
+# JSON-string-escape a value: \ → \\, " → \", control chars → \uXXXX.
+# Pure POSIX (no jq). Handles tabs/newlines/quotes; doesn't handle multi-byte
+# control chars but those are vanishingly rare in event titles/summaries.
+json_escape() {
+  printf '%s' "$1" | awk '
+    BEGIN { ORS=""; out="" }
+    {
+      s = $0
+      if (NR > 1) out = out "\\n"
+      gsub(/\\/, "\\\\", s)
+      gsub(/"/, "\\\"", s)
+      gsub(/\t/, "\\t", s)
+      gsub(/\r/, "\\r", s)
+      out = out s
+    }
+    END { print out }
+  '
+}
+
+# Decide whether a metadata value should be emitted as a JSON primitive
+# (number / boolean / null) or as a quoted string.
+emit_meta_value() {
+  v="$1"
+  case "$v" in
+    true|false|null)
+      printf '%s' "$v"
+      ;;
+    *)
+      # Numeric? (int or float, optional leading -)
+      if printf '%s' "$v" | awk '/^-?[0-9]+(\.[0-9]+)?$/ { exit 0 } { exit 1 }'; then
+        printf '%s' "$v"
+      else
+        printf '"%s"' "$(json_escape "$v")"
+      fi
+      ;;
+  esac
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --status)   STATUS="$2";    shift 2 ;;
+    --title)    TITLE="$2";     shift 2 ;;
+    --source)   SOURCE="$2";    shift 2 ;;
+    --summary)  SUMMARY="$2";   shift 2 ;;
+    --id)       EVENT_ID="$2";  shift 2 ;;
+    --meta)
+      pair="$2"
+      key="${pair%%=*}"
+      val="${pair#*=}"
+      if [ -z "$key" ] || [ "$key" = "$pair" ]; then
+        [ -n "${AIEVOPET_DEBUG:-}" ] && printf 'aievopet-emit: skipping malformed --meta %s\n' "$pair" >&2
+      else
+        METADATA_JSON="${METADATA_JSON},\"$(json_escape "$key")\":$(emit_meta_value "$val")"
+      fi
+      shift 2
+      ;;
+    *)
+      [ -n "${AIEVOPET_DEBUG:-}" ] && printf 'aievopet-emit: unknown flag %s\n' "$1" >&2
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$STATUS" ] || [ -z "$TITLE" ]; then
+  printf 'aievopet-emit: --status and --title are required\n' >&2
+  exit 0
+fi
+
+# Auto-fill id and createdAt.
+if [ -z "$EVENT_ID" ]; then
+  EVENT_ID="coding-$(date +%s)-$$"
+fi
+CREATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+# Assemble JSON. We build it manually because the alternative (jq) adds a
+# dependency, and the alternative-alternative (node) is heavier than the
+# whole pet daemon's hot path.
+PAYLOAD='{"event":{"id":"'"$(json_escape "$EVENT_ID")"'"'
+PAYLOAD="$PAYLOAD"',"kind":"'"$(json_escape "$KIND")"'"'
+PAYLOAD="$PAYLOAD"',"source":"'"$(json_escape "$SOURCE")"'"'
+PAYLOAD="$PAYLOAD"',"status":"'"$(json_escape "$STATUS")"'"'
+PAYLOAD="$PAYLOAD"',"title":"'"$(json_escape "$TITLE")"'"'
+PAYLOAD="$PAYLOAD"',"createdAt":"'"$CREATED_AT"'"'
+if [ -n "$SUMMARY" ]; then
+  PAYLOAD="$PAYLOAD"',"summary":"'"$(json_escape "$SUMMARY")"'"'
+fi
+if [ -n "$METADATA_JSON" ]; then
+  # METADATA_JSON already starts with a leading comma, so wrap and trim.
+  PAYLOAD="$PAYLOAD"',"metadata":{'"${METADATA_JSON#,}"'}'
+fi
+PAYLOAD="$PAYLOAD"'}}'
+
+# Fire and forget. --max-time keeps us snappy; --silent + --output mute
+# normal output; --fail-with-body returns a non-zero exit on HTTP errors but
+# we ignore it (we never fail the caller).
+if [ -n "${AIEVOPET_DEBUG:-}" ]; then
+  printf 'aievopet-emit: POST %s\naievopet-emit: %s\n' "$URL" "$PAYLOAD" >&2
+fi
+
+curl --silent --show-error --max-time "$TIMEOUT" \
+  --header 'content-type: application/json' \
+  --data "$PAYLOAD" \
+  --output /dev/null \
+  "$URL" 2>/dev/null || {
+  [ -n "${AIEVOPET_DEBUG:-}" ] && printf 'aievopet-emit: bridge unreachable (this is fine)\n' >&2
+}
+
+exit 0

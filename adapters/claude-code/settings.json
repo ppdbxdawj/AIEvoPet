@@ -1,0 +1,38 @@
+{
+  "_comment": "Merge the keys below into your real ~/.claude/settings.json or .claude/settings.json. The 'hooks' key is the only one this adapter cares about — leave the rest of your settings alone.",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/aievopet-on-stop.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/aievopet-on-notification.sh"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/aievopet-on-stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

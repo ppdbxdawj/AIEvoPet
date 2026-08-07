@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": ".cursor/hooks/aievopet-on-stop.sh"
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "command": ".cursor/hooks/aievopet-on-tool-failure.sh"
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": ".cursor/hooks/aievopet-on-stop.sh"
+      }
+    ]
+  }
+}

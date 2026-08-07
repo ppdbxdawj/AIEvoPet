@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AIEvoPet: task started",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "emit:coding-event", "--", "{\"kind\":\"task-start\",\"source\":\"vscode\",\"status\":\"running\",\"title\":\"VS Code task started\"}"],
+      "problemMatcher": []
+    },
+    {
+      "label": "AIEvoPet: task done",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "emit:coding-event", "--", "{\"kind\":\"task-done\",\"source\":\"vscode\",\"status\":\"succeeded\",\"title\":\"VS Code task done\"}"],
+      "problemMatcher": []
+    },
+    {
+      "label": "AIEvoPet: task failed",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "emit:coding-event", "--", "{\"kind\":\"task-failed\",\"source\":\"vscode\",\"status\":\"failed\",\"title\":\"VS Code task failed\"}"],
+      "problemMatcher": []
+    },
+    {
+      "label": "AIEvoPet: tests passed",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "emit:coding-event", "--", "{\"kind\":\"test-pass\",\"source\":\"vscode\",\"status\":\"succeeded\",\"title\":\"VS Code tests passed\"}"],
+      "problemMatcher": []
+    },
+    {
+      "label": "AIEvoPet: tests failed",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "emit:coding-event", "--", "{\"kind\":\"test-fail\",\"source\":\"vscode\",\"status\":\"failed\",\"title\":\"VS Code tests failed\"}"],
+      "problemMatcher": []
+    },
+    {
+      "label": "AIEvoPet: build passed",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "emit:coding-event", "--", "{\"kind\":\"build-pass\",\"source\":\"vscode\",\"status\":\"succeeded\",\"title\":\"VS Code build passed\"}"],
+      "problemMatcher": []
+    },
+    {
+      "label": "AIEvoPet: build failed",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "emit:coding-event", "--", "{\"kind\":\"build-fail\",\"source\":\"vscode\",\"status\":\"failed\",\"title\":\"VS Code build failed\"}"],
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+dist-electron
+out
+src-tauri/target
+
+# Test artifacts
+test-results
+playwright-report
+coverage
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+!.vscode/tasks.json
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Project-specific
+.ttadk
+.tmp-*
+.tmp-*.mjs
+.claude/settings.local.json
+.claude/worktrees/
+
+# AI generation artifacts
+output/
+art/drafts/
+art_assets/
+
+# Internal design notes, planning docs, art-generation prompts.
+# These contain WIP thinking, vendor-specific tooling references, and
+# internal roadmap details that aren't meant for public distribution.
+# Public-facing protocol docs live inline in CONTRIBUTING.md / README.md
+# or in source comments where contributors will actually read them.
+docs/

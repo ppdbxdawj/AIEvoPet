@@ -1,0 +1,71 @@
+{
+  "name": "aievopet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An open-source AI desktop pet that lives, learns, and grows with you. Built with Tauri, React, and local LLMs.",
+  "keywords": [
+    "desktop-pet",
+    "ai-companion",
+    "tauri",
+    "agent",
+    "llm",
+    "pixel-art",
+    "tamagotchi-inspired",
+    "local-ai",
+    "react",
+    "rust"
+  ],
+  "homepage": "https://github.com/aievopet/aievopet#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aievopet/aievopet.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aievopet/aievopet/issues"
+  },
+  "license": "MIT",
+  "author": "AIEvoPet Contributors",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173",
+    "app:dev": "node scripts/app-dev.mjs",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "emit:coding-event": "node scripts/emit-coding-event.mjs",
+    "hatch:emote": "node scripts/hatch-emote.mjs",
+    "import:petdex": "node scripts/import-petdex.mjs",
+    "wardrobe:import-cutouts": "node scripts/import-cutout-variants.mjs",
+    "wardrobe:sync": "node scripts/sync-wardrobe-assets.mjs",
+    "wardrobe:check": "node scripts/sync-wardrobe-assets.mjs --check",
+    "tauri:dev": "node scripts/app-dev.mjs",
+    "tauri:build": "tauri build",
+    "tauri:e2e:serve": "tauri dev --config src-tauri/tauri.e2e.conf.json --features webdriver",
+    "e2e:web:serve": "sh -c 'trap \"exit 0\" TERM INT; VITE_AI_PET_E2E=1 npm run build && (lsof -ti tcp:4173 -sTCP:LISTEN | xargs -r kill; python3 -m http.server 4173 --directory out/renderer --bind 127.0.0.1)'"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.1.0",
+    "pixi.js": "^8.18.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@tauri-apps/cli": "^2.1.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.8.1",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@types/selenium-webdriver": "^4.35.4",
+    "@vitejs/plugin-react": "^5.1.0",
+    "jsdom": "^29.0.2",
+    "selenium-webdriver": "^4.43.0",
+    "sharp": "^0.34.5",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10",
+    "vitest": "^4.1.5"
+  }
+}

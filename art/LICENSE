@@ -1,0 +1,68 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+The visual assets contained in this directory (and its subdirectories) —
+including but not limited to pixel sprites, character art, icon files,
+backgrounds, palettes, and animation frames — are dual-licensed alongside
+the code repository as a whole, but specifically distributed under the
+Creative Commons Attribution 4.0 International License.
+
+Copyright (c) 2026 AIEvoPet Contributors
+
+AI-assistance disclosure
+------------------------
+
+Many of the visual assets in this directory were produced with the help of
+generative AI image tools, working from prompts, references, and revision
+guidance authored and curated by the AIEvoPet Contributors. Hand-edited
+post-processing (background removal, palette quantization, sprite
+trimming, and selection between candidate variants) was applied before
+the assets were committed.
+
+Copyright treatment of purely AI-generated output varies by jurisdiction
+— some jurisdictions (e.g., the United States Copyright Office's current
+guidance) hold that material lacking sufficient human authorship is not
+eligible for copyright; others recognize copyright in AI-assisted works
+where meaningful human creative input is present.
+
+To the extent that copyright subsists in any of these assets under the
+law applicable to your use, that copyright is licensed to you under the
+Creative Commons Attribution 4.0 International License described below.
+Where copyright does not subsist, the assets are practically usable
+without restriction; we still ask, as a matter of community courtesy,
+that you preserve the attribution string at the bottom of this file when
+redistributing or building on them.
+
+You are free to:
+
+  - Share — copy and redistribute the material in any medium or format
+  - Adapt — remix, transform, and build upon the material for any purpose,
+            even commercially.
+
+Under the following terms:
+
+  - Attribution — You must give appropriate credit, provide a link to the
+                  license, and indicate if changes were made. You may do
+                  so in any reasonable manner, but not in any way that
+                  suggests the licensor endorses you or your use.
+
+No additional restrictions — You may not apply legal terms or
+technological measures that legally restrict others from doing anything
+the license permits.
+
+Notices:
+
+  - You do not have to comply with the license for elements of the
+    material in the public domain or where your use is permitted by an
+    applicable exception or limitation.
+  - No warranties are given. The license may not give you all of the
+    permissions necessary for your intended use. For example, other rights
+    such as publicity, privacy, or moral rights may limit how you use
+    the material.
+
+Full legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+Suggested attribution string:
+
+    "AIEvoPet pixel sprites by AIEvoPet Contributors,
+     licensed under CC BY 4.0,
+     https://github.com/aievopet/aievopet"

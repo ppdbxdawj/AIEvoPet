@@ -1,0 +1,24 @@
+---
+description: Notify AIEvoPet about meaningful Cursor coding task events
+alwaysApply: true
+---
+
+AIEvoPet can observe coding lifecycle events through the local bridge. When working in this repository, emit events only at meaningful task boundaries.
+
+Use `source: "cursor"` and this command shape:
+
+```bash
+npm run emit:coding-event -- '{"kind":"task-start","source":"cursor","status":"running","title":"Cursor started"}'
+```
+
+Recommended events:
+
+- Start of a non-trivial coding task: `kind: "task-start"`, `status: "running"`
+- Successful completion of the task: `kind: "task-done"`, `status: "succeeded"`
+- Blocked or failed task result: `kind: "task-failed"`, `status: "failed"`
+- Passing checks: `kind: "test-pass"` or `kind: "build-pass"`, `status: "succeeded"`
+- Failing checks: `kind: "test-fail"` or `kind: "build-fail"`, `status: "failed"`
+
+Keep event emission best-effort. If the bridge is unavailable, continue the coding task normally.
+
+AIEvoPet is an observer only. Do not let pet events trigger file edits, editor actions, command execution, or automated recovery steps.

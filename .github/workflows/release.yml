@@ -1,0 +1,142 @@
+name: Release
+
+# Cuts a draft GitHub Release with native installers for every supported OS.
+#
+# How to ship:
+#   1. Bump `version` in package.json + src-tauri/tauri.conf.json + src-tauri/Cargo.toml
+#   2. Update CHANGELOG.md
+#   3. git tag v0.1.1 && git push --tags
+# This workflow then builds a draft release. Edit the notes, attach demo assets,
+# and click "Publish".
+#
+# Manual run via workflow_dispatch is also supported (useful for testing the
+# matrix without cutting a tag). Manual runs upload to a draft tagged
+# `nightly-<run_number>`.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  # Fast pre-flight: if typecheck or tests fail, don't waste 30+ min building
+  # binaries on three OSes.
+  preflight:
+    name: Pre-flight (typecheck + tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+  build-tauri:
+    name: Build (${{ matrix.platform.label }})
+    needs: preflight
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - label: macOS Apple Silicon
+            runner: macos-14
+            target: aarch64-apple-darwin
+            args: --target aarch64-apple-darwin
+          - label: macOS Intel
+            runner: macos-13
+            target: x86_64-apple-darwin
+            args: --target x86_64-apple-darwin
+          - label: Linux x86_64
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            args: ''
+          - label: Windows x86_64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            args: ''
+    runs-on: ${{ matrix.platform.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.target }}
+
+      - name: Cache cargo registry + build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: ${{ matrix.platform.target }}
+
+      # Tauri on Linux needs webkit2gtk + a few helpers to bundle AppImage/deb.
+      - name: Install Linux build deps
+        if: matrix.platform.runner == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libgtk-3-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev \
+            file
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      # tauri-action runs `npm run tauri build` under the hood, attaches the
+      # produced installers (.dmg / .app.tar.gz / .msi / .AppImage / .deb) to a
+      # draft GitHub Release, and creates the release if it doesn't exist.
+      - name: Build app + upload to draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Disable Tauri updater signing for now (no public update server yet).
+          # Once we host signed updates, set TAURI_SIGNING_PRIVATE_KEY +
+          # TAURI_SIGNING_PRIVATE_KEY_PASSWORD as repo secrets and remove this.
+        with:
+          tagName: ${{ github.event_name == 'workflow_dispatch' && format('nightly-{0}', github.run_number) || github.ref_name }}
+          releaseName: ${{ github.event_name == 'workflow_dispatch' && format('Nightly {0}', github.run_number) || format('AIEvoPet {0}', github.ref_name) }}
+          releaseBody: |
+            ## What's new
+
+            See [CHANGELOG.md](https://github.com/aievopet/aievopet/blob/main/CHANGELOG.md) for the full list of changes.
+
+            ## Downloads
+
+            - **macOS (Apple Silicon)** — `*_aarch64.dmg`
+            - **macOS (Intel)** — `*_x64.dmg`
+            - **Windows** — `*_x64-setup.exe` or `*_x64_en-US.msi`
+            - **Linux** — `*_amd64.AppImage` or `*_amd64.deb`
+
+            > First-launch warnings are expected on macOS / Windows because
+            > builds are unsigned — see the README for the one-click workaround.
+          releaseDraft: true
+          prerelease: ${{ github.event_name == 'workflow_dispatch' }}
+          args: ${{ matrix.platform.args }}
