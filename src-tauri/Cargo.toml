@@ -29,7 +29,7 @@ user-idle = "0.6"
 # renderer as data URLs. We use this only at startup (~50 small files,
 # total < 5MB), so the CPU cost is negligible and we avoid setting up
 # tauri's asset:// custom protocol just for this one feature.
-base64 = "0.22"
+base64 = "0.23"
 
 # macOS-only: we reach into AppKit to set
 # NSWindowCollectionBehaviorFullScreenAuxiliary on the pet window so it can
